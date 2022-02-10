@@ -4,6 +4,8 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.DriveTrainSubsystem;
@@ -23,14 +25,15 @@ public class DriveCmd extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+
     System.out.println("Starting TeleopDriveCommand");
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    double xSpeed = RobotContainer.joyStick.getY();
-    double zRotation = RobotContainer.joyStick.getZ() * 0.5;
+    double xSpeed = RobotContainer.logitech.getRawAxis(1) * 0.5;
+    double zRotation = RobotContainer.logitech.getRawAxis(2) * 0.5;
     // negate zRotation because we invertetd rightMotorControllerGroup
     driveTrainSubsystem.arcadeDrive(xSpeed, zRotation);
   }

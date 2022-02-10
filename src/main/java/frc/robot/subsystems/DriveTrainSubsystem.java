@@ -24,7 +24,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkMax.IdleMode;
-
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel;
@@ -39,6 +39,8 @@ public class DriveTrainSubsystem extends SubsystemBase {
       CANSparkMaxLowLevel.MotorType.kBrushless);
   CANSparkMax rightBackCANSparkMax = new CANSparkMax(DriveConstants.rightBackCANSparkMaxCANId,
       CANSparkMaxLowLevel.MotorType.kBrushless);
+
+  WPI_TalonSRX testTalon = new WPI_TalonSRX(0);
 
   // using built in encoders in NEO motors
   private final static RelativeEncoder leftRelativeEncoder = leftFrontCANSparkMax.getEncoder();
@@ -68,8 +70,12 @@ public class DriveTrainSubsystem extends SubsystemBase {
     leftRelativeEncoder.setPosition(0);
     rightRelativeEncoder.setPosition(0);
 
+    leftBackCANSparkMax.follow(leftFrontCANSparkMax);
+    rightBackCANSparkMax.follow(rightFrontCANSparkMax);
+
     // TODO Inverted
-    rightMotorControllerGroup.setInverted(true);
+    rightMotorControllerGroup.setInverted(false);
+    leftMotorControllerGroup.setInverted(true);
     // leftMotorControllerGroup.setInverted(true);
     // leftMotorControllerGroup.setInverted(true);
 
@@ -94,11 +100,13 @@ public class DriveTrainSubsystem extends SubsystemBase {
     rightRelativeEncoder.setVelocityConversionFactor(DriveConstants.kLinearDistancePerMotorRotation / 60);
     leftRelativeEncoder.setVelocityConversionFactor(DriveConstants.kLinearDistancePerMotorRotation / 60);
 
-    resetEncoders();
-    m_odometry = new DifferentialDriveOdometry(navX.getRotation2d());
-
     navX.reset();
     navX.calibrate();
+    resetEncoders();
+
+   // navX.getRotation2d().minus(navX.getRotation2d()).minus(navX.getRotation2d());
+
+    m_odometry = new DifferentialDriveOdometry(navX.getRotation2d());
     m_odometry.resetPosition(new Pose2d(), navX.getRotation2d());
   }
 
@@ -135,26 +143,30 @@ public class DriveTrainSubsystem extends SubsystemBase {
 
   }
 
+  public DifferentialDriveOdometry getOdometry() {
+    return m_odometry;
+  }
+
   public MotorControllerGroup getLeftMotorControllerGroup() {
     return leftMotorControllerGroup;
   }
 
   public double getRightEncoderPosition() {
-    return rightRelativeEncoder.getPosition();
+    return -rightRelativeEncoder.getPosition();
   }
 
   // TODO Inverted
   public double getLeftEncoderPosition() {
-    return -leftRelativeEncoder.getPosition();
+    return leftRelativeEncoder.getPosition();
   }
 
   public double getRightEncoderVelocity() {
-    return rightRelativeEncoder.getVelocity();
+    return -rightRelativeEncoder.getVelocity();
   }
 
   // TODO Inverted
   public double getLeftEncoderVelocity() {
-    return -leftRelativeEncoder.getVelocity();
+    return leftRelativeEncoder.getVelocity();
   }
 
   public DifferentialDrive getDifferentialDrive() {
@@ -162,7 +174,7 @@ public class DriveTrainSubsystem extends SubsystemBase {
   }
 
   // The gyro sensor
-  private final static Gyro navX = new AHRS(SPI.Port.kMXP);
+  public final static Gyro navX = new AHRS(SPI.Port.kMXP);
   // private final static Gyro navX = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
 
   public Gyro getGyro() {
@@ -333,7 +345,7 @@ public class DriveTrainSubsystem extends SubsystemBase {
    * @return the robot's heading in degrees, from -180 to 180
    */
   public static double getHeading() {
-
+    //return 0;
     return navX.getRotation2d().getDegrees();
   }
 
